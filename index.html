@@ -1,0 +1,147 @@
+<!doctype html>
+<html lang="id">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>System Alert</title>
+  <style>
+    :root{
+      --bg:#0b0b0b;
+      --red:#ff2b2b;
+      --muted:#cfcfcf;
+    }
+    html,body{height:100%;margin:0;font-family:Inter,Segoe UI,Roboto,Arial,sans-serif;background:var(--bg);color:#fff}
+    .overlay{
+      position:fixed;inset:0;display:flex;align-items:center;justify-content:center;
+      background:radial-gradient(circle at 20% 20%, rgba(255,0,0,0.08), transparent 15%),
+                 linear-gradient(180deg, rgba(0,0,0,0.6), rgba(0,0,0,0.9));
+      z-index:9999;padding:20px;
+    }
+    .card{
+      width:min(980px,94%);max-width:1200px;background:rgba(0,0,0,0.65);border-radius:12px;
+      box-shadow:0 10px 40px rgba(0,0,0,0.7);overflow:hidden;border:1px solid rgba(255,255,255,0.04);
+      transform:scale(1);transition:transform .18s ease;
+    }
+    .card:hover{transform:scale(1.01)}
+    .header{
+      display:flex;gap:16px;align-items:center;padding:24px;border-bottom:1px solid rgba(255,255,255,0.03);
+      background:linear-gradient(90deg, rgba(255,0,0,0.08), transparent);
+    }
+    .dot{width:18px;height:18px;border-radius:50%;background:var(--red);box-shadow:0 0 18px rgba(255,0,0,0.45)}
+    .title{font-size:20px;font-weight:700}
+    .body{display:flex;gap:24px;padding:28px;align-items:center}
+    .left{flex:1}
+    .right{width:220px;text-align:center}
+    h1{margin:0;font-size:36px;line-height:1.02;color:var(--red);letter-spacing:0.5px}
+    p{margin:10px 0;color:var(--muted)}
+    .details{background:rgba(255,255,255,0.02);padding:14px;border-radius:8px;font-family:monospace;font-size:13px;color:#ffdcdc}
+    .count{font-size:46px;font-weight:800;margin-top:8px}
+    .btn{
+      display:inline-block;padding:10px 18px;border-radius:8px;background:#fff;color:#111;font-weight:700;text-decoration:none;
+      cursor:pointer;border:none;margin-top:12px
+    }
+    .small{font-size:12px;color:#bbb;margin-top:8px}
+    /* subtle flashing red border animation */
+    @keyframes pulse {
+      0%{box-shadow:0 0 32px rgba(255,0,0,0.06)}
+      50%{box-shadow:0 0 48px rgba(255,0,0,0.12)}
+      100%{box-shadow:0 0 32px rgba(255,0,0,0.06)}
+    }
+    .card{animation:pulse 2.2s infinite ease-in-out}
+    /* final reveal */
+    .reveal{display:none;padding:28px;text-align:center}
+    .reveal.show{display:block}
+    .reveal h2{color:#7fffbf;margin:0 0 8px}
+  </style>
+</head>
+<body>
+  <div class="overlay" id="overlay" role="dialog" aria-modal="true" aria-label="System alert">
+    <div class="card" id="card">
+      <div class="header">
+        <div class="dot" aria-hidden="true"></div>
+        <div>
+          <div class="title">System Security — Threat Detected</div>
+          <div class="small">Sistem: Windows · Proteksi Real-time: AKTIF</div>
+        </div>
+      </div>
+
+      <div class="body" id="mainBody">
+        <div class="left">
+          <h1>Virus Detected!</h1>
+          <p class="small">Beberapa proses mencurigakan terdeteksi di memori. Untuk keamanan, sistem akan mencoba menonaktifkan akses jaringan sementara.</p>
+          <div class="details" id="details">
+            Scanned files: 1,204 · Infected: 3 · Threat level: CRITICAL
+          </div>
+        </div>
+
+        <div class="right">
+          <div class="details" style="background:transparent;color:#fff;font-weight:700;text-align:center">
+            Menyelesaikan tindakan otomatis dalam
+            <div class="count" id="count">10</div>
+          </div>
+
+          <button class="btn" id="stopBtn" title="Batalkan">BATALKAN</button>
+          <div class="small">Tekan Esc untuk tutup</div>
+        </div>
+      </div>
+
+      <div class="reveal" id="reveal">
+        <h2>Hehe — Ini cuma prank 😄</h2>
+        <p class="small">Tidak ada virus nyata. Kalau kamu mau, kasih tahu temanmu agar cek antivirus sungguhan kalau khawatir.</p>
+        <button class="btn" id="closeBtn">TUTUP</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    (function(){
+      // safe, local-only prank. No data collection, no redirects.
+      let countEl = document.getElementById('count');
+      let overlay = document.getElementById('overlay');
+      let reveal = document.getElementById('reveal');
+      let mainBody = document.getElementById('mainBody');
+      let stopBtn = document.getElementById('stopBtn');
+      let closeBtn = document.getElementById('closeBtn');
+
+      let countdown = 10;
+      let timer = setInterval(()=> {
+        countdown--;
+        countEl.textContent = countdown;
+        // change detail text for drama
+        if (countdown === 6) document.getElementById('details').textContent = 'Scanning running processes...';
+        if (countdown === 3) document.getElementById('details').textContent = 'Attempting quarantine...';
+        if (countdown <= 0) {
+          clearInterval(timer);
+          // reveal prank
+          mainBody.style.display = 'none';
+          reveal.classList.add('show');
+        }
+      }, 1000);
+
+      // allow cancellation - harmless: just stop countdown and reveal calm message
+      stopBtn.addEventListener('click', ()=> {
+        clearInterval(timer);
+        mainBody.style.display = 'none';
+        reveal.classList.add('show');
+        reveal.querySelector('h2').textContent = 'Dibatalkan — Ini cuma prank 😊';
+      });
+
+      closeBtn.addEventListener('click', ()=> overlay.remove());
+
+      // close with escape
+      document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') overlay.remove();
+      });
+
+      // prevent accidental navigation (but not forcing) — just show confirm if they try to close tab
+      window.addEventListener('beforeunload', function (e) {
+        // modern browsers ignore custom message; we just return string to trigger prompt
+        return 'Halaman ini sedang menampilkan sistem alert. Yakin mau tutup?';
+      });
+
+      // optional sound effect (commented out to avoid auto-play issues)
+      // let audio = new Audio('data:audio/wav;base64,...'); audio.play().catch(()=>{});
+    })();
+  </script>
+</body>
+</html>
